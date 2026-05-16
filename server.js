@@ -1,5 +1,5 @@
 import express from "express";
-import Anthropic from "@anthropic-ai/sdk";
+import { Deepseek } from "deepseek-js";
 import dotenv from "dotenv";
 import cors from "cors";
 
@@ -10,7 +10,9 @@ app.use(cors({ origin: "https://taar0kh.github.io" }));
 app.use(express.json());
 app.use(express.static("public"));
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const client = new Deepseek({
+  apiKey: process.env.DEEPSEEK_API_KEY
+});
 
 const SYSTEM_PROMPT = `You are an analytical engine evaluating real-time Persian Gulf infrastructure stress conditions.
 
@@ -30,8 +32,8 @@ app.post("/evaluate", async (req, res) => {
   try {
     const situation = req.body.situation || "No description provided";
 
-    const message = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
+    const message = await client.chat.completions.create({
+      model: "deepseek-chat",
       max_tokens: 1000,
       system: SYSTEM_PROMPT,
       messages: [
@@ -39,7 +41,7 @@ app.post("/evaluate", async (req, res) => {
       ]
     });
 
-    const text = message.content[0].text;
+    const text = message.choices[0].message.content;
     const json = JSON.parse(text);
     res.json(json);
 
